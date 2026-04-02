@@ -1,0 +1,1844 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>akshay@dev ~ portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Victor+Mono:wght@300;400;500;600;700&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --term: "Victor Mono", monospace;
+        --disp: "Bebas Neue", serif;
+      }
+
+      [data-theme="dark"] {
+        --bg: #0a0c10;
+        --bg2: #0f1218;
+        --bg3: #151a23;
+        --fg: #00ff9c;
+        --fg-dim: #00b36b;
+        --fg-ghost: #0d3d2a;
+        --text: #c9d1d9;
+        --muted: #6e7681;
+        --dim: #2d333b;
+        --white: #e6edf3;
+        --amber: #ffa657;
+        --border: rgba(0, 255, 156, 0.1);
+        --glow: rgba(0, 255, 156, 0.05);
+        --scanline: rgba(0, 255, 156, 0.03);
+        --nav-bg: rgba(10, 12, 16, 0.92);
+      }
+      [data-theme="light"] {
+        --bg: #f0f4ec;
+        --bg2: #fff;
+        --bg3: #e8ede2;
+        --fg: #0d6e3f;
+        --fg-dim: #1a9959;
+        --fg-ghost: #c5e6d3;
+        --text: #24292f;
+        --muted: #6e7681;
+        --dim: #d0d7de;
+        --white: #1a1a1a;
+        --amber: #d97706;
+        --border: rgba(13, 110, 63, 0.12);
+        --glow: rgba(13, 110, 63, 0.03);
+        --scanline: rgba(0, 0, 0, 0.015);
+        --nav-bg: rgba(240, 244, 236, 0.92);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--term);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        transition:
+          background 0.4s,
+          color 0.4s;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      ::selection {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      .scanlines {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          var(--scanline) 0px,
+          var(--scanline) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+      }
+      .crt-glow {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        box-shadow: inset 0 0 100px var(--glow);
+        transition: box-shadow 0.4s;
+      }
+
+      .rv {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: all 0.7s cubic-bezier(0.33, 1, 0.68, 1);
+      }
+      .rv.vis {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* NAV */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        padding: 0 clamp(16px, 4vw, 32px);
+        height: 56px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--nav-bg);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        transition: all 0.4s;
+      }
+      .nav-prompt {
+        font-size: clamp(11px, 2.5vw, 13px);
+        color: var(--fg);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 50vw;
+      }
+      .nav-prompt .blink {
+        animation: blink 1s step-end infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .nav-r {
+        display: flex;
+        gap: clamp(10px, 2vw, 20px);
+        align-items: center;
+      }
+      .nav-r a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 12px;
+        transition: color 0.3s;
+        padding: 8px 4px;
+      }
+      .nav-r a:hover {
+        color: var(--fg);
+      }
+      .tm-switch {
+        font-size: 11px;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 6px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: transparent;
+        transition: all 0.3s;
+        font-family: var(--term);
+        white-space: nowrap;
+        min-height: 32px;
+      }
+      .tm-switch:hover {
+        border-color: var(--fg);
+        color: var(--fg);
+      }
+
+      .menu-btn {
+        display: none;
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .menu-btn span,
+      .menu-btn span::before,
+      .menu-btn span::after {
+        display: block;
+        width: 16px;
+        height: 1.5px;
+        background: var(--fg);
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        transition: all 0.3s;
+      }
+      .menu-btn span {
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .menu-btn span::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: 0;
+      }
+      .menu-btn span::after {
+        content: "";
+        position: absolute;
+        top: 5px;
+        left: 0;
+      }
+      .menu-btn.open span {
+        background: transparent;
+      }
+      .menu-btn.open span::before {
+        top: 0;
+        transform: rotate(45deg);
+      }
+      .menu-btn.open span::after {
+        top: 0;
+        transform: rotate(-45deg);
+      }
+
+      .mobile-nav {
+        display: none;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--nav-bg);
+        backdrop-filter: blur(20px);
+        z-index: 99;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .mobile-nav.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .mobile-nav a {
+        font-size: 18px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.3s;
+        padding: 12px 24px;
+      }
+      .mobile-nav a:hover {
+        color: var(--fg);
+      }
+
+      /* HERO */
+      .hero {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: clamp(80px, 12vh, 120px) clamp(16px, 4vw, 32px)
+          clamp(40px, 6vh, 60px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-terminal {
+        max-width: 720px;
+        width: 100%;
+      }
+      .term-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px clamp(12px, 3vw, 16px);
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: 8px 8px 0 0;
+        transition: all 0.4s;
+      }
+      .term-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .term-dot:nth-child(1) {
+        background: #ff5f57;
+      }
+      .term-dot:nth-child(2) {
+        background: #febc2e;
+      }
+      .term-dot:nth-child(3) {
+        background: #28c840;
+      }
+      .term-title {
+        font-size: 11px;
+        color: var(--muted);
+        margin-left: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .term-body {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 0 0 8px 8px;
+        padding: clamp(16px, 4vw, 28px);
+        transition: all 0.4s;
+        overflow-x: hidden;
+        word-break: break-word;
+      }
+      .cmd {
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: clamp(11px, 2.5vw, 13px);
+      }
+      .cmd .prompt {
+        color: var(--fg);
+      }
+      .cmd .path {
+        color: var(--amber);
+      }
+      .output {
+        margin-bottom: 12px;
+      }
+      .output-name {
+        font-family: var(--disp);
+        font-size: clamp(28px, 7vw, 60px);
+        font-weight: 900;
+        color: var(--white);
+        line-height: 1.05;
+        margin: 8px 0;
+        letter-spacing: -0.02em;
+        transition: color 0.4s;
+      }
+      .output-title {
+        color: var(--fg);
+        font-size: clamp(13px, 3vw, 16px);
+        margin-bottom: 10px;
+      }
+      .output-desc {
+        color: var(--muted);
+        font-size: clamp(12px, 2.8vw, 14px);
+        line-height: 1.7;
+        max-width: 530px;
+        margin-bottom: 16px;
+      }
+      .output-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .term-link {
+        color: var(--fg);
+        text-decoration: none;
+        padding: 10px 18px;
+        border: 1px solid var(--fg-ghost);
+        border-radius: 4px;
+        font-size: 12px;
+        transition: all 0.3s;
+        white-space: nowrap;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .term-link:hover {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: var(--fg);
+      }
+
+      .stats-term {
+        display: flex;
+        gap: clamp(8px, 2vw, 24px);
+        margin-top: clamp(20px, 4vw, 32px);
+        flex-wrap: wrap;
+      }
+      .stat-block {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: clamp(12px, 2vw, 16px) clamp(14px, 3vw, 24px);
+        transition: all 0.4s;
+        flex: 1;
+        min-width: 90px;
+      }
+      .stat-block:hover {
+        border-color: var(--fg);
+      }
+      .stat-v {
+        font-size: clamp(20px, 4vw, 24px);
+        font-weight: 700;
+        color: var(--fg);
+      }
+      .stat-l {
+        font-size: clamp(8px, 1.8vw, 10px);
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        margin-top: 2px;
+      }
+
+      /* SECTIONS */
+      section {
+        padding: clamp(60px, 10vw, 100px) clamp(16px, 4vw, 32px);
+        position: relative;
+        z-index: 1;
+      }
+      .sec-cmd {
+        font-size: clamp(11px, 2.5vw, 13px);
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .sec-cmd .prompt {
+        color: var(--fg);
+      }
+      .sec-cmd .path {
+        color: var(--amber);
+      }
+      .sec-title {
+        font-family: var(--disp);
+        font-size: clamp(24px, 5vw, 40px);
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: clamp(24px, 5vw, 40px);
+        transition: color 0.4s;
+      }
+
+      /* EXPERIENCE */
+      .exp-list {
+        max-width: 720px;
+        width: 100%;
+      }
+      .exp-item {
+        padding: clamp(16px, 3vw, 24px);
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: all 0.4s;
+      }
+      .exp-item:hover {
+        border-color: var(--fg-dim);
+      }
+      .exp-hdr {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .exp-role {
+        font-size: clamp(14px, 3vw, 16px);
+        font-weight: 600;
+        color: var(--white);
+        transition: color 0.4s;
+      }
+      .exp-date {
+        font-size: clamp(10px, 2vw, 11px);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .exp-co {
+        color: var(--fg);
+        font-size: clamp(12px, 2.5vw, 13px);
+        margin-bottom: 8px;
+      }
+      .exp-desc {
+        font-size: clamp(12px, 2.5vw, 13px);
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 12px;
+      }
+      .exp-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      .exp-tag {
+        font-size: clamp(9px, 2vw, 10px);
+        padding: 4px 10px;
+        border-radius: 3px;
+        background: var(--fg-ghost);
+        color: var(--fg-dim);
+        transition: all 0.3s;
+      }
+      .exp-tag:hover {
+        background: var(--fg);
+        color: var(--bg);
+      }
+
+      /* SKILLS */
+      .sk-cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        max-width: 720px;
+        width: 100%;
+      }
+      .sk-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(16px, 3vw, 24px);
+        transition: all 0.4s;
+      }
+      .sk-box:hover {
+        border-color: var(--fg-dim);
+      }
+      .sk-box-h {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: var(--fg);
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+        transition: border-color 0.4s;
+      }
+      .sk-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--muted);
+        border-bottom: 1px dashed var(--dim);
+        transition: border-color 0.4s;
+        gap: 8px;
+      }
+      .sk-row:last-child {
+        border-bottom: none;
+      }
+      .sk-row span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sk-bar {
+        width: clamp(36px, 8vw, 56px);
+        height: 3px;
+        background: var(--dim);
+        border-radius: 2px;
+        overflow: hidden;
+        transition: background 0.4s;
+        flex-shrink: 0;
+      }
+      .sk-bf {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--fg);
+        width: 0;
+        transition: width 1s cubic-bezier(0.33, 1, 0.68, 1);
+      }
+
+      .cert-list {
+        display: flex;
+        gap: 8px;
+        margin-top: clamp(20px, 4vw, 32px);
+        flex-wrap: wrap;
+      }
+      .cert-tag {
+        font-size: clamp(10px, 2.2vw, 11px);
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--muted);
+        transition: all 0.3s;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .cert-tag:hover {
+        border-color: var(--fg);
+        color: var(--fg);
+      }
+
+      .edu-list {
+        display: flex;
+        gap: 12px;
+        margin-top: clamp(14px, 3vw, 20px);
+        flex-wrap: wrap;
+      }
+      .edu-tag {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(10px, 2vw, 14px) clamp(14px, 3vw, 20px);
+        transition: all 0.4s;
+        flex: 1;
+        min-width: clamp(180px, 45%, 280px);
+      }
+      .edu-tag:hover {
+        border-color: var(--fg-dim);
+      }
+      .edu-deg {
+        font-size: clamp(12px, 2.5vw, 13px);
+        font-weight: 600;
+        color: var(--white);
+        margin-bottom: 2px;
+        transition: color 0.4s;
+      }
+      .edu-sch {
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--fg);
+      }
+      .edu-yr {
+        font-size: clamp(10px, 2vw, 11px);
+        color: var(--muted);
+      }
+
+      /* CONTACT */
+      .ct-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(12px, 3vw, 24px);
+        max-width: 720px;
+        width: 100%;
+      }
+      .ct-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(18px, 4vw, 28px);
+        transition: all 0.4s;
+      }
+      .ct-card:hover {
+        border-color: var(--fg-dim);
+      }
+      .ct-heading {
+        font-family: var(--disp);
+        font-size: clamp(20px, 4vw, 28px);
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 12px;
+        transition: color 0.4s;
+        line-height: 1.2;
+      }
+      .ct-desc {
+        font-size: clamp(12px, 2.5vw, 13px);
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .ct-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--dim);
+        font-size: clamp(11px, 2.5vw, 13px);
+        transition: border-color 0.4s;
+      }
+      .ct-item:last-child {
+        border-bottom: none;
+      }
+      .ct-item-icon {
+        color: var(--fg);
+        font-size: 12px;
+        width: 24px;
+        flex-shrink: 0;
+      }
+      .ct-item a,
+      .ct-item span {
+        color: var(--text);
+        text-decoration: none;
+        transition: color 0.3s;
+        word-break: break-all;
+      }
+      .ct-item a:hover {
+        color: var(--fg);
+      }
+      .lang-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .lang-t {
+        font-size: 10px;
+        padding: 6px 12px;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        color: var(--muted);
+        transition: all 0.3s;
+        min-height: 30px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .lang-t:hover {
+        border-color: var(--fg);
+        color: var(--fg);
+      }
+
+      /* BLOG POSTS */
+      .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        max-width: 720px;
+        width: 100%;
+      }
+      .blog-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(18px, 3vw, 24px);
+        transition: all 0.4s;
+        text-decoration: none;
+        color: var(--text);
+        display: block;
+        position: relative;
+        overflow: hidden;
+      }
+      .blog-card:hover {
+        border-color: var(--fg-dim);
+        transform: translateY(-3px);
+      }
+      .blog-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--fg);
+        transform: scaleX(0);
+        transition: transform 0.4s;
+        transform-origin: left;
+      }
+      .blog-card:hover::after {
+        transform: scaleX(1);
+      }
+      .blog-card-date {
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+      }
+      .blog-card-title {
+        font-size: clamp(14px, 2.8vw, 16px);
+        font-weight: 600;
+        color: var(--white);
+        margin-bottom: 8px;
+        line-height: 1.4;
+        transition: color 0.4s;
+      }
+      .blog-card:hover .blog-card-title {
+        color: var(--fg);
+      }
+      .blog-card-desc {
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      .blog-card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .blog-card-tag {
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 3px;
+        background: var(--fg-ghost);
+        color: var(--fg-dim);
+      }
+      .blog-card-arrow {
+        font-size: 12px;
+        color: var(--fg);
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: all 0.3s;
+        position: absolute;
+        top: clamp(18px, 3vw, 24px);
+        right: clamp(18px, 3vw, 24px);
+      }
+      .blog-card:hover .blog-card-arrow {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      /* NPM PACKAGES */
+      .npm-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        max-width: 720px;
+        width: 100%;
+        margin-top: clamp(20px, 4vw, 32px);
+      }
+      .npm-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(18px, 3vw, 24px);
+        transition: all 0.4s;
+        text-decoration: none;
+        color: var(--text);
+        display: block;
+        position: relative;
+        overflow: hidden;
+      }
+      .npm-card:hover {
+        border-color: var(--fg-dim);
+        transform: translateY(-3px);
+      }
+      .npm-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .npm-card-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--fg-ghost);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--fg);
+        flex-shrink: 0;
+        transition: all 0.4s;
+      }
+      .npm-card:hover .npm-card-icon {
+        background: var(--fg);
+        color: var(--bg);
+      }
+      .npm-card-name {
+        font-size: clamp(13px, 2.5vw, 15px);
+        font-weight: 600;
+        color: var(--white);
+        transition: color 0.4s;
+      }
+      .npm-card:hover .npm-card-name {
+        color: var(--fg);
+      }
+      .npm-card-ver {
+        font-size: 10px;
+        color: var(--muted);
+      }
+      .npm-card-desc {
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+      .npm-card-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+      }
+      .npm-card-stat {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .npm-card-stat::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--fg);
+        flex-shrink: 0;
+        opacity: 0.5;
+      }
+      .npm-install {
+        font-size: 11px;
+        padding: 8px 14px;
+        background: var(--bg3);
+        border: 1px dashed var(--border);
+        border-radius: 4px;
+        color: var(--fg);
+        margin-top: 12px;
+        word-break: break-all;
+      }
+
+      /* CERTIFICATIONS */
+      .cert-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        max-width: 720px;
+        width: 100%;
+      }
+      .cert-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(18px, 3vw, 28px);
+        transition: all 0.4s;
+        position: relative;
+        overflow: hidden;
+      }
+      .cert-card:hover {
+        border-color: var(--fg-dim);
+        transform: translateY(-3px);
+      }
+      .cert-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--fg), var(--amber));
+        transform: scaleX(0);
+        transition: transform 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+        transform-origin: left;
+      }
+      .cert-card:hover::before {
+        transform: scaleX(1);
+      }
+      .cert-card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        background: var(--fg-ghost);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--fg);
+        transition: all 0.4s;
+      }
+      .cert-card:hover .cert-card-icon {
+        background: var(--fg);
+        color: var(--bg);
+      }
+      .cert-card-title {
+        font-size: clamp(13px, 2.5vw, 15px);
+        font-weight: 600;
+        color: var(--white);
+        margin-bottom: 4px;
+        transition: color 0.4s;
+      }
+      .cert-card-issuer {
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--fg);
+        margin-bottom: 8px;
+      }
+      .cert-card-desc {
+        font-size: clamp(11px, 2vw, 12px);
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .cert-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        padding: 5px 12px;
+        border-radius: 3px;
+        background: var(--fg-ghost);
+        color: var(--fg-dim);
+      }
+      .cert-card-badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--fg);
+        flex-shrink: 0;
+      }
+
+      /* EDUCATION */
+      .edu-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        max-width: 720px;
+        width: 100%;
+        margin-top: clamp(20px, 4vw, 32px);
+      }
+      .edu-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: clamp(16px, 3vw, 24px);
+        transition: all 0.4s;
+      }
+      .edu-card:hover {
+        border-color: var(--fg-dim);
+      }
+      .edu-card-deg {
+        font-size: clamp(13px, 2.5vw, 14px);
+        font-weight: 600;
+        color: var(--white);
+        margin-bottom: 4px;
+        transition: color 0.4s;
+      }
+      .edu-card-sch {
+        font-size: clamp(11px, 2.2vw, 12px);
+        color: var(--fg);
+        margin-bottom: 4px;
+      }
+      .edu-card-yr {
+        font-size: clamp(10px, 2vw, 11px);
+        color: var(--muted);
+      }
+
+      .ct-form-t {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .fg {
+        margin-bottom: 14px;
+      }
+      .fl {
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        margin-bottom: 5px;
+        display: block;
+      }
+      .fi {
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--text);
+        font-family: var(--term);
+        font-size: 13px;
+        outline: none;
+        transition: all 0.3s;
+        min-height: 44px;
+      }
+      .fi:focus {
+        border-color: var(--fg);
+        box-shadow: 0 0 0 2px var(--fg-ghost);
+      }
+      .fi::placeholder {
+        color: var(--dim);
+      }
+      textarea.fi {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .f-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--fg);
+        color: var(--bg);
+        border: none;
+        border-radius: 4px;
+        font-family: var(--term);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-height: 44px;
+      }
+      .f-btn:hover {
+        box-shadow: 0 0 24px var(--glow);
+        transform: translateY(-1px);
+      }
+
+      footer {
+        padding: clamp(16px, 4vw, 28px) clamp(16px, 4vw, 32px);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        font-size: clamp(10px, 2.2vw, 12px);
+        color: var(--muted);
+        transition: border-color 0.4s;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      footer a {
+        color: var(--fg-dim);
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+      footer a:hover {
+        color: var(--fg);
+      }
+      .ft-links {
+        display: flex;
+        gap: clamp(10px, 2vw, 16px);
+      }
+
+      /* ═══ RESPONSIVE ═══ */
+      @media (max-width: 768px) {
+        .nav-r a {
+          display: none;
+        }
+        .menu-btn {
+          display: block;
+        }
+        .mobile-nav {
+          display: flex;
+        }
+        .sk-cols {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ct-grid {
+          grid-template-columns: 1fr;
+        }
+        .cert-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .edu-grid {
+          grid-template-columns: 1fr;
+        }
+        .blog-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .npm-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 480px) {
+        nav {
+          height: 52px;
+        }
+        .nav-prompt {
+          max-width: 55vw;
+        }
+        .hero {
+          padding-top: 72px;
+        }
+        .term-title {
+          display: none;
+        }
+        .sk-cols {
+          grid-template-columns: 1fr;
+        }
+        .cert-grid {
+          grid-template-columns: 1fr;
+        }
+        .blog-grid {
+          grid-template-columns: 1fr;
+        }
+        .npm-grid {
+          grid-template-columns: 1fr;
+        }
+        .stats-term {
+          gap: 8px;
+        }
+        .stat-block {
+          min-width: 0;
+          flex-basis: calc(33.33% - 6px);
+        }
+        footer {
+          justify-content: center;
+          text-align: center;
+        }
+        footer > span {
+          width: 100%;
+          text-align: center;
+        }
+      }
+      @media (max-width: 360px) {
+        .stat-block {
+          flex-basis: 100%;
+        }
+        .output-name {
+          font-size: 26px;
+        }
+      }
+      @media (min-width: 1200px) {
+        section {
+          padding-left: clamp(32px, 8vw, 120px);
+          padding-right: clamp(32px, 8vw, 120px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scanlines"></div>
+    <div class="crt-glow"></div>
+
+    <nav>
+      <div class="nav-prompt">
+        <span class="prompt">akshay</span>@<span class="path">dev</span>:~$
+        <span class="blink">_</span>
+      </div>
+      <div class="nav-r">
+        <a href="#exp">./work</a>
+        <a href="#sk">./stack</a>
+        <a href="#certs">./certs</a>
+        <a href="#writing">./blog</a>
+        <a href="#ct">./contact</a>
+        <button class="tm-switch" id="tm">theme</button>
+        <button class="menu-btn" id="menuBtn" aria-label="Menu">
+          <span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#exp" class="mob-link">./work</a>
+      <a href="#sk" class="mob-link">./stack</a>
+      <a href="#certs" class="mob-link">./certs</a>
+      <a href="#writing" class="mob-link">./blog</a>
+      <a href="#ct" class="mob-link">./contact</a>
+    </div>
+
+    <section class="hero" id="top">
+      <div class="hero-terminal rv">
+        <div class="term-bar">
+          <div class="term-dot"></div>
+          <div class="term-dot"></div>
+          <div class="term-dot"></div>
+          <div class="term-title">akshay@portfolio — zsh</div>
+        </div>
+        <div class="term-body">
+          <div class="cmd"><span class="prompt">$</span> cat about.md</div>
+          <div class="output">
+            <div class="output-name">Akshay Sonwalkar</div>
+            <div class="output-title">Senior Backend Engineer @ AntStack</div>
+            <div class="output-desc">
+              I build serverless backends that scale. Specializing in AWS,
+              event-driven architectures, and cloud-native platforms — with a
+              focus on clean code, reliable systems, and developer tooling.
+              <br />Based in Pune, India.
+            </div>
+            <div class="output-links">
+              <a href="#exp" class="term-link">ls ./work</a>
+              <a href="#ct" class="term-link">cat contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-term">
+        <div class="stat-block rv">
+          <div class="stat-v"><span class="ctr" data-t="4">0</span>+</div>
+          <div class="stat-l">YEARS EXP</div>
+        </div>
+        <div class="stat-block rv">
+          <div class="stat-v"><span class="ctr" data-t="10">0</span>+</div>
+          <div class="stat-l">AWS SERVICES</div>
+        </div>
+        <div class="stat-block rv">
+          <div class="stat-v"><span class="ctr" data-t="3">0</span></div>
+          <div class="stat-l">BLOGS PUBLISHED</div>
+        </div>
+      </div>
+      <div
+        class="rv"
+        style="
+          margin-top: clamp(16px, 3vw, 24px);
+          font-size: clamp(11px, 2.5vw, 13px);
+          color: var(--muted);
+        "
+      >
+        <span style="color: var(--fg)">$</span> echo
+        <span style="color: var(--amber)">$learning</span><br />
+        <span style="color: var(--fg)">&gt;</span> AI/LLMs, AWS CDK, Supabase,
+        Prisma
+      </div>
+    </section>
+
+    <section id="exp">
+      <div class="sec-cmd rv">
+        <span class="prompt">$</span> ls -la
+        <span class="path">./experience</span>
+      </div>
+      <h2 class="sec-title rv">Experience</h2>
+      <div class="exp-list">
+        <div class="exp-item rv">
+          <div class="exp-hdr">
+            <span class="exp-role">Senior Backend Engineer (MTS-3)</span
+            ><span class="exp-date">Apr 2025 — Present</span>
+          </div>
+          <div class="exp-co">AntStack</div>
+          <p class="exp-desc">
+            Took end-to-end ownership of the InOffice internal productivity
+            platform — migrating services from Serverless Framework v3 to AWS
+            SAM, implementing new features, resolving production issues, and
+            integrating OnLeave (third-party leave management system) to
+            automate employee leave sync. <br />Deliver new product features and
+            fix critical issues on the YUM client project.
+          </p>
+          <div class="exp-tags">
+            <span class="exp-tag">AWS SAM</span
+            ><span class="exp-tag">Node.js</span
+            ><span class="exp-tag">TypeScript</span
+            ><span class="exp-tag">Slack App</span
+            ><span class="exp-tag">Serverless Migration</span>
+          </div>
+        </div>
+        <div class="exp-item rv">
+          <div class="exp-hdr">
+            <span class="exp-role">Backend Engineer (MTS-2)</span
+            ><span class="exp-date">May 2023 — Mar 2025</span>
+          </div>
+          <div class="exp-co">AntStack — FinTech Platform</div>
+          <p class="exp-desc">
+            Built and scaled serverless APIs for a fintech invoice factoring
+            platform using Node.js, TypeScript, AWS Lambda, PostgreSQL, and S3.
+            Improved PostgreSQL query performance with optimized indexing and
+            joins, resulting in 4x faster API response times. Designed
+            event-driven processing for invoices from app uploads and emails.
+          </p>
+          <div class="exp-tags">
+            <span class="exp-tag">PostgreSQL</span
+            ><span class="exp-tag">Lambda</span><span class="exp-tag">S3</span
+            ><span class="exp-tag">Jest</span
+            ><span class="exp-tag">FinTech</span>
+          </div>
+        </div>
+        <div class="exp-item rv">
+          <div class="exp-hdr">
+            <span class="exp-role">Backend Engineer (MTS-1)</span
+            ><span class="exp-date">Feb 2022 — Apr 2023</span>
+          </div>
+          <div class="exp-co">AntStack — InsurTech</div>
+          <p class="exp-desc">
+            Developed and managed serverless APIs using AWS Lambda, API Gateway,
+            S3, Step Functions, EventBridge, and DynamoDB. Implemented ES build
+            for optimized Lambda packaging, reducing cold start latency.
+            Designed an event-driven integration hub to support the blue-green
+            migration process.
+          </p>
+          <div class="exp-tags">
+            <span class="exp-tag">API Gateway</span
+            ><span class="exp-tag">Step Functions</span
+            ><span class="exp-tag">DynamoDB</span
+            ><span class="exp-tag">EventBridge</span
+            ><span class="exp-tag">S3</span
+            ><span class="exp-tag">Serverless Framework</span>
+          </div>
+        </div>
+        <div class="exp-item rv">
+          <div class="exp-hdr">
+            <span class="exp-role">Web Developer</span
+            ><span class="exp-date">Oct 2021 — Feb 2022</span>
+          </div>
+          <div class="exp-co">Welldone Healthcare</div>
+          <p class="exp-desc">
+            Designed and established the foundational codebase and database
+            schema for the healthcare web app using Django. Integrated Google
+            Maps for location services and built a secure login system. Created
+            responsive web pages for a consistent experience across devices.
+          </p>
+          <div class="exp-tags">
+            <span class="exp-tag">Django</span
+            ><span class="exp-tag">Python</span
+            ><span class="exp-tag">Google Maps</span
+            ><span class="exp-tag">Database Design</span
+            ><span class="exp-tag">Responsive UI</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sk">
+      <div class="sec-cmd rv">
+        <span class="prompt">$</span> cat
+        <span class="path">./skills.json</span>
+      </div>
+      <h2 class="sec-title rv">Stack</h2>
+      <div class="sk-cols">
+        <div class="sk-box rv">
+          <div class="sk-box-h">BACKEND</div>
+          <div class="sk-row">
+            <span>Node.js / TS</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="92"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>PostgreSQL</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="78"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>DynamoDB</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="65"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>Python</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="48"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>Event-Driven</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="85"></div></div>
+          </div>
+        </div>
+        <div class="sk-box rv">
+          <div class="sk-box-h">AWS SERVICES</div>
+          <div class="sk-row">
+            <span>AWS SAM / CDK</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="82"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>Lambda</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="95"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>API Gateway</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="85"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>S3</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="80"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>EventBridge</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="68"></div></div>
+          </div>
+        </div>
+        <div class="sk-box rv">
+          <div class="sk-box-h">QUALITY & TOOLS</div>
+          <div class="sk-row">
+            <span>Jest</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="85"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>SonarCloud</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="60"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>ES Build</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="68"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>Git / CI-CD</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="82"></div></div>
+          </div>
+          <div class="sk-row">
+            <span>Zod</span>
+            <div class="sk-bar"><div class="sk-bf" data-w="78"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CERTIFICATIONS & EDUCATION ═══ -->
+    <section id="certs">
+      <div class="sec-cmd rv">
+        <span class="prompt">$</span> cat
+        <span class="path">./certifications.json</span>
+      </div>
+      <h2 class="sec-title rv">Certifications & Education</h2>
+
+      <div class="cert-grid">
+        <div class="cert-card rv">
+          <div class="cert-card-icon">SA</div>
+          <div class="cert-card-title">AWS Solutions Architect — Associate</div>
+          <div class="cert-card-issuer">Amazon Web Services</div>
+          <div class="cert-card-desc">
+            Designing distributed systems, cost optimization, and architecting
+            resilient, high-performing solutions on AWS.
+          </div>
+          <div class="cert-card-badge">VERIFIED</div>
+        </div>
+
+        <div class="cert-card rv">
+          <div class="cert-card-icon">50</div>
+          <div class="cert-card-title">CS50's Web Programming</div>
+          <div class="cert-card-issuer">Harvard University (edX)</div>
+          <div class="cert-card-desc">
+            Web development with Python, JavaScript, SQL, HTML, CSS, Django, and
+            React. Full-stack project-based curriculum.
+          </div>
+          <div class="cert-card-badge">COMPLETED</div>
+        </div>
+
+        <div class="cert-card rv">
+          <div class="cert-card-icon">CP</div>
+          <div class="cert-card-title">
+            Ultimate AWS Certified Cloud Practitioner
+          </div>
+          <div class="cert-card-issuer">Udemy</div>
+          <div class="cert-card-desc">
+            Comprehensive coverage of AWS Cloud concepts, services, security,
+            architecture, pricing, and support fundamentals.
+          </div>
+          <div class="cert-card-badge">COMPLETED</div>
+        </div>
+      </div>
+
+      <div class="edu-grid">
+        <div class="edu-card rv">
+          <div class="edu-card-deg">B.E. Computer Engineering</div>
+          <div class="edu-card-sch">Savitribai Phule Pune University</div>
+          <div class="edu-card-yr">2017 — 2020</div>
+        </div>
+        <div class="edu-card rv">
+          <div class="edu-card-deg">Diploma, Information Technology</div>
+          <div class="edu-card-sch">Govt. Polytechnic, Solapur</div>
+          <div class="edu-card-yr">2014 — 2017</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BLOG & NPM PACKAGES ═══ -->
+    <section id="writing">
+      <div class="sec-cmd rv">
+        <span class="prompt">$</span> ls -la <span class="path">./blog</span>
+      </div>
+      <h2 class="sec-title rv">Blog & Open Source</h2>
+
+      <div class="blog-grid">
+        <a
+          href="https://www.antstack.com/blog/how-to-keep-your-aws-ecr-repository-lean-with-serverless"
+          target="_blank"
+          rel="noopener"
+          class="blog-card rv"
+        >
+          <span class="blog-card-arrow">&rarr;</span>
+          <div class="blog-card-date">
+            JUN 2024 &middot; ANTSTACK &middot; 3 MIN
+          </div>
+          <div class="blog-card-title">
+            How to Keep Your AWS ECR Repository Lean with Serverless
+          </div>
+          <div class="blog-card-desc">
+            Tackle inflated ECR storage costs with the
+            serverless-ecr-image-cleaner plugin. Auto-clean old container images
+            after every deployment with simple YAML config.
+          </div>
+          <div class="blog-card-tags">
+            <span class="blog-card-tag">AWS ECR</span>
+            <span class="blog-card-tag">Serverless</span>
+            <span class="blog-card-tag">Plugin</span>
+            <span class="blog-card-tag">DevOps</span>
+          </div>
+        </a>
+
+        <a
+          href="https://www.antstack.com/blog/automating-time-based-actions-using-event-bridge-s-scheduler-or-dynamo-db-ttl-and-ddb-stream/"
+          target="_blank"
+          rel="noopener"
+          class="blog-card rv"
+        >
+          <span class="blog-card-arrow">&rarr;</span>
+          <div class="blog-card-date">
+            NOV 2023 &middot; ANTSTACK &middot; 5 MIN
+          </div>
+          <div class="blog-card-title">
+            Automating Time-Based Actions Using EventBridge Scheduler or
+            DynamoDB TTL & Streams
+          </div>
+          <div class="blog-card-desc">
+            Two serverless approaches to scheduling tasks — compare EventBridge
+            Scheduler vs DynamoDB TTL with DDB Streams for automated time-based
+            execution.
+          </div>
+          <div class="blog-card-tags">
+            <span class="blog-card-tag">EventBridge</span>
+            <span class="blog-card-tag">DynamoDB</span>
+            <span class="blog-card-tag">TTL</span>
+            <span class="blog-card-tag">Streams</span>
+          </div>
+        </a>
+
+        <a
+          href="https://medium.com/@sonakashay/how-to-host-a-django-application-on-heroku-5b4c48a1b308"
+          target="_blank"
+          rel="noopener"
+          class="blog-card rv"
+        >
+          <span class="blog-card-arrow">&rarr;</span>
+          <div class="blog-card-date">
+            JUL 2021 &middot; MEDIUM &middot; 2 MIN
+          </div>
+          <div class="blog-card-title">
+            How to Deploy a Django Application on Heroku
+          </div>
+          <div class="blog-card-desc">
+            Step-by-step guide covering Procfile setup, security hardening with
+            Django's deploy check, Heroku CLI deployment, and production-ready
+            configuration.
+          </div>
+          <div class="blog-card-tags">
+            <span class="blog-card-tag">Django</span>
+            <span class="blog-card-tag">Heroku</span>
+            <span class="blog-card-tag">Python</span>
+            <span class="blog-card-tag">Deployment</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="sec-cmd rv" style="margin-top: clamp(40px, 6vw, 64px)">
+        <span class="prompt">$</span> npm search
+        <span class="path">serverless-ecr-image-cleaner</span>
+      </div>
+
+      <div class="npm-grid">
+        <a
+          href="https://www.npmjs.com/package/serverless-ecr-image-cleaner"
+          target="_blank"
+          rel="noopener"
+          class="npm-card rv"
+        >
+          <div class="npm-card-header">
+            <div class="npm-card-icon">npm</div>
+            <div>
+              <div class="npm-card-name">serverless-ecr-image-cleaner</div>
+              <div class="npm-card-ver">Published on npm</div>
+            </div>
+          </div>
+          <div class="npm-card-desc">
+            A Serverless Framework plugin that automatically cleans up old,
+            unused container images from your AWS ECR repository after
+            deployment. Configure the number of images to keep, target specific
+            repos, and reduce storage costs effortlessly.
+          </div>
+          <div class="npm-card-stats">
+            <span class="npm-card-stat">Serverless Plugin</span>
+            <span class="npm-card-stat">AWS ECR</span>
+            <span class="npm-card-stat">Node.js</span>
+          </div>
+          <div class="npm-install">npm i serverless-ecr-image-cleaner</div>
+        </a>
+
+        <a
+          href="https://github.com/Sonwalkar"
+          target="_blank"
+          rel="noopener"
+          class="npm-card rv"
+        >
+          <div class="npm-card-header">
+            <div class="npm-card-icon">&lt;/&gt;</div>
+            <div>
+              <div class="npm-card-name">github.com/Sonwalkar</div>
+              <div class="npm-card-ver">23 repositories</div>
+            </div>
+          </div>
+          <div class="npm-card-desc">
+            Open source projects, serverless experiments, and backend utilities.
+            Explore my repositories for AWS tools and more.
+          </div>
+          <div class="npm-card-stats">
+            <span class="npm-card-stat">TypeScript</span>
+            <span class="npm-card-stat">Node.js</span>
+            <span class="npm-card-stat">Python</span>
+          </div>
+          <div class="npm-install">git clone https://github.com/Sonwalkar</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══ CONTACT (info only, form commented out) ═══ -->
+    <section id="ct">
+      <div class="sec-cmd rv">
+        <span class="prompt">$</span> cat <span class="path">./contact.md</span>
+      </div>
+      <h2 class="sec-title rv">Contact</h2>
+
+      <div style="max-width: 720px">
+        <div class="ct-card rv" style="margin-bottom: 0">
+          <h3 class="ct-heading">Let's build something great.</h3>
+          <p class="ct-desc">
+            Open to discussing serverless architecture, cloud-native solutions,
+            or your next AWS-powered project. Currently based in Pune, India.
+          </p>
+          <div class="ct-item">
+            <span class="ct-item-icon">@</span
+            ><a href="mailto:sonakashay@gmail.com">sonakashay@gmail.com</a>
+          </div>
+          <div class="ct-item">
+            <span class="ct-item-icon">in</span
+            ><a
+              href="https://www.linkedin.com/in/akshay-sonwalkar"
+              target="_blank"
+              rel="noopener"
+              >akshay-sonwalkar</a
+            >
+          </div>
+          <div class="ct-item">
+            <span class="ct-item-icon">&lt;/&gt;</span
+            ><a
+              href="https://github.com/Sonwalkar"
+              target="_blank"
+              rel="noopener"
+              >github.com/Sonwalkar</a
+            >
+          </div>
+          <div class="ct-item">
+            <span class="ct-item-icon">&gt;_</span
+            ><span>Pune, Maharashtra, India</span>
+          </div>
+          <div class="lang-row">
+            <span class="lang-t">English</span><span class="lang-t">Hindi</span
+            ><span class="lang-t">Marathi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEND MESSAGE FORM (commented out)
+  <div class="ct-card rv">
+    <div class="ct-form-t">SEND MESSAGE</div>
+    <div class="fg"><label class="fl">NAME</label><input type="text" class="fi" placeholder="Your name"></div>
+    <div class="fg"><label class="fl">EMAIL</label><input type="email" class="fi" placeholder="your@email.com"></div>
+    <div class="fg"><label class="fl">MESSAGE</label><textarea class="fi" placeholder="Tell me about your project..."></textarea></div>
+    <button class="f-btn">send &rarr;</button>
+  </div>
+  -->
+    </section>
+
+    <footer>
+      <span
+        ><span style="color: var(--fg)">akshay</span>@dev:~$ echo "built with
+        care"</span
+      >
+      <div class="ft-links">
+        <a
+          href="/cdn-cgi/l/email-protection#f0839f9e919b9183989189b0979d91999cde939f9d"
+          >email</a
+        ><a href="https://github.com/Sonwalkar" target="_blank" rel="noopener"
+          >github</a
+        ><a
+          href="https://www.linkedin.com/in/akshay-sonwalkar"
+          target="_blank"
+          rel="noopener"
+          >linkedin</a
+        ><a href="#top">top &uarr;</a>
+      </div>
+    </footer>
+
+    <script
+      data-cfasync="false"
+      src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"
+    ></script>
+    <script>
+      // Theme
+      const html = document.documentElement,
+        tmBtn = document.getElementById("tm");
+      tmBtn.onclick = () => {
+        const t = html.dataset.theme === "dark" ? "light" : "dark";
+        html.dataset.theme = t;
+        localStorage.setItem("t5", t);
+      };
+      if (localStorage.getItem("t5"))
+        html.dataset.theme = localStorage.getItem("t5");
+
+      // Mobile menu
+      const menuBtn = document.getElementById("menuBtn"),
+        mobileNav = document.getElementById("mobileNav");
+      menuBtn.onclick = () => {
+        menuBtn.classList.toggle("open");
+        mobileNav.classList.toggle("open");
+        document.body.style.overflow = mobileNav.classList.contains("open")
+          ? "hidden"
+          : "";
+      };
+      document.querySelectorAll(".mob-link").forEach((a) => {
+        a.addEventListener("click", () => {
+          menuBtn.classList.remove("open");
+          mobileNav.classList.remove("open");
+          document.body.style.overflow = "";
+        });
+      });
+
+      // Scroll reveal
+      const obs = new IntersectionObserver(
+        (en) => {
+          en.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add("vis");
+              obs.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.06, rootMargin: "0px 0px -30px 0px" },
+      );
+      document.querySelectorAll(".rv").forEach((el) => obs.observe(el));
+
+      // Skill bars
+      const bo = new IntersectionObserver(
+        (en) => {
+          en.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.style.width = e.target.dataset.w + "%";
+              bo.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.3 },
+      );
+      document.querySelectorAll(".sk-bf").forEach((b) => bo.observe(b));
+
+      // Counters
+      document.querySelectorAll(".ctr").forEach((el) => {
+        const t = +el.dataset.t;
+        let c = 0;
+        const s = Math.max(1, Math.floor(t / 50));
+        const co = new IntersectionObserver(
+          (en) => {
+            if (en[0].isIntersecting) {
+              const iv = setInterval(() => {
+                c = Math.min(c + s, t);
+                el.textContent = c;
+                if (c >= t) clearInterval(iv);
+              }, 30);
+              co.disconnect();
+            }
+          },
+          { threshold: 0.5 },
+        );
+        co.observe(el);
+      });
+
+      // Smooth scroll
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          document
+            .querySelector(a.getAttribute("href"))
+            ?.scrollIntoView({ behavior: "smooth" });
+        });
+      });
+
+      // Active nav
+      const sections = document.querySelectorAll("section[id]"),
+        navLinks = document.querySelectorAll(".nav-r a,.mob-link");
+      window.addEventListener("scroll", () => {
+        let cur = "";
+        sections.forEach((s) => {
+          if (scrollY >= s.offsetTop - 200) cur = s.id;
+        });
+        navLinks.forEach((a) => {
+          a.style.color =
+            a.getAttribute("href") === "#" + cur ? "var(--fg)" : "";
+        });
+      });
+    </script>
+  </body>
+</html>
